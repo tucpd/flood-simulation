@@ -1,0 +1,21 @@
+{
+  "target_hw": [
+    810,
+    441
+  ],
+  "label_count": 4033,
+  "rain_count": 672,
+  "label_step_sec": 300,
+  "rain_step_sec": 1800,
+  "label_start_sec": 0,
+  "label_end_sec": 1209600,
+  "rain_start": "20220818-S000000",
+  "rain_end": "20220831-S233000",
+  "label_dir": "data/pakistan/flood_maps",
+  "rain_cache_path": "data/pakistan/cache/rainfall_30min.npy",
+  "wd_count": 4033,
+  "wd_step_sec": 300,
+  "wd_start_sec": 0,
+  "wd_end_sec": 1209600,
+  "wd_dir": "data/pakistan/flood_maps"
+}

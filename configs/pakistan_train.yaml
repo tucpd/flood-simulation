@@ -1,0 +1,49 @@
+seed: 42
+
+data:
+  root: data/pakistan
+  cache_dir: data/pakistan/cache
+  label_dir: flood_maps
+  target_shape: [810, 441]
+
+  # Input channel composition:
+  # static channels: [dem, land_use]
+  # dynamic channels: rainfall history + water-depth history
+  rain_history: 4
+  rain_stride_steps: 6
+  wd_history: 2
+  pred_horizon: 1
+
+  # Temporal split policy:
+  # 1) First split all valid timestamps into train/test by time order.
+  # 2) Then split train into train/valid by time order.
+  test_ratio: 0.2
+  val_ratio_from_train: 0.15
+
+  # Patch-based training for 16GB VRAM class GPUs (RTX 4080)
+  patch_size: 256
+  train_samples_per_epoch: 4000
+  val_samples: 512
+
+  # Feature scaling (min-max after clipping)
+  dem_clip: [0.0, 2000.0]
+  rain_clip: [0.0, 100.0]
+  wd_clip: [0.0, 30.0]
+
+model:
+  base_channels: 32
+
+train:
+  batch_size: 8
+  num_workers: 4
+  lr: 0.0003
+  weight_decay: 0.0001
+  epochs: 40
+  amp: true
+  grad_clip: 1.0
+  lambda_mass: 0.05
+  device: cuda
+
+output:
+  dir: outputs/pakistan_baseline
+  save_every: 1
