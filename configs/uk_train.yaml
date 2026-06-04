@@ -1,10 +1,12 @@
 seed: 42
 
 data:
-  root: data/pakistan
-  cache_dir: data/pakistan/cache
+  root: data/uk
+  cache_dir: data/uk/cache
   label_dir: flood_maps
-  target_shape: [810, 441]
+  dem_filename: UK_DEM.tif
+  land_use_filename: UK.tif
+  label_naming: seconds
 
   # Input channel composition:
   # static channels: [dem, land_use]
@@ -55,5 +57,5 @@ train:
   device: cuda
 
 output:
-  dir: outputs/pakistan_baseline
+  dir: outputs/uk_baseline
   save_every: 1

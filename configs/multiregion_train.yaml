@@ -1,9 +1,12 @@
 seed: 42
 
 data:
+  # Shared defaults for all regions; region-specific values are overridden via the regions list.
   root: data/pakistan
   cache_dir: data/pakistan/cache
   label_dir: flood_maps
+  label_naming: index
+  label_step_sec: 300
   target_shape: [810, 441]
 
   # Input channel composition:
@@ -21,7 +24,7 @@ data:
   val_ratio_from_train: 0.15
 
   # Patch-based training for 16GB VRAM class GPUs (RTX 4080)
-  patch_size: 256
+  patch_size: 128
   train_samples_per_epoch: 4000
   val_samples: 512
 
@@ -29,6 +32,47 @@ data:
   dem_clip: [0.0, 2000.0]
   rain_clip: [0.0, 100.0]
   wd_clip: [0.0, 30.0]
+
+regions:
+  - name: pakistan
+    root: data/pakistan
+    cache_dir: data/pakistan/cache
+    label_dir: flood_maps
+    label_naming: index
+    label_step_sec: 300
+    dem_clip: [0.0, 2000.0]
+    rain_clip: [0.0, 100.0]
+    wd_clip: [0.0, 30.0]
+
+  - name: australia
+    root: data/australia
+    cache_dir: data/australia/cache
+    label_dir: flood_maps
+    label_naming: seconds
+    label_step_sec: 300
+    dem_clip: [0.0, 2000.0]
+    rain_clip: [0.0, 100.0]
+    wd_clip: [0.0, 30.0]
+
+  - name: mozambique
+    root: data/mozambique
+    cache_dir: data/mozambique/cache
+    label_dir: flood_maps
+    label_naming: seconds
+    label_step_sec: 300
+    dem_clip: [0.0, 2000.0]
+    rain_clip: [0.0, 100.0]
+    wd_clip: [0.0, 30.0]
+
+  - name: uk
+    root: data/uk
+    cache_dir: data/uk/cache
+    label_dir: flood_maps
+    label_naming: seconds
+    label_step_sec: 300
+    dem_clip: [0.0, 2000.0]
+    rain_clip: [0.0, 100.0]
+    wd_clip: [0.0, 30.0]
 
 model:
   base_channels: 32
@@ -52,8 +96,9 @@ train:
   wet_threshold_m: 0.1
   wet_bce_temperature: 0.05
   slope_epsilon: 0.002
+  log_first_n_steps: 5
   device: cuda
 
 output:
-  dir: outputs/pakistan_baseline
+  dir: outputs/multiregion
   save_every: 1

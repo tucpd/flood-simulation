@@ -16,7 +16,7 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from floodcast.data import PakistanFloodDataset
+from floodcast.data import FloodDataset
 from floodcast.models import SmallUNet
 
 
@@ -33,10 +33,11 @@ def load_checkpoint(path: Path, map_location: torch.device) -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Evaluate Pakistan flood model on test split")
-    parser.add_argument("--config", type=Path, default=Path("configs/pakistan_train.yaml"))
-    parser.add_argument("--checkpoint", type=Path, default=Path("outputs/pakistan_baseline/best.pt"))
-    parser.add_argument("--threshold-m", type=float, default=0.1, help="Flood-depth threshold in meters for IoU")
+    parser = argparse.ArgumentParser(description="Evaluate flood model on one region test split")
+    parser.add_argument("--config", type=Path, required=True)
+    parser.add_argument("--checkpoint", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--threshold-m", type=float, default=0.1)
     args = parser.parse_args()
 
     cfg = load_config(args.config)
@@ -48,7 +49,7 @@ def main() -> None:
         device_name = "cpu"
     device = torch.device(device_name)
 
-    ds_test = PakistanFloodDataset(
+    ds_test = FloodDataset(
         root=Path(data_cfg["root"]),
         cache_dir=Path(data_cfg["cache_dir"]),
         label_dir=data_cfg.get("label_dir", "flood_maps"),
@@ -121,7 +122,7 @@ def main() -> None:
 
             pred = torch.clamp(pred, 0.0, 1.0)
 
-            diff = (pred - y)
+            diff = pred - y
             mse_sum += float((diff * diff).sum().item())
             mae_sum += float(diff.abs().sum().item())
             pix_count += int(diff.numel())
@@ -182,11 +183,10 @@ def main() -> None:
         delta_pred_abs_m = None
         delta_true_abs_m = None
 
-    out_dir = Path(cfg["output"]["dir"])
-    out_dir.mkdir(parents=True, exist_ok=True)
-
+    args.output.parent.mkdir(parents=True, exist_ok=True)
     metrics = {
         "checkpoint": str(args.checkpoint),
+        "config": str(args.config),
         "test_samples": len(ds_test),
         "threshold_m": float(args.threshold_m),
         "rmse_m": float(rmse_m),
@@ -202,8 +202,7 @@ def main() -> None:
         "delta_true_abs_m": None if delta_true_abs_m is None else float(delta_true_abs_m),
     }
 
-    metrics_path = out_dir / "test_metrics.json"
-    with metrics_path.open("w", encoding="utf-8") as f:
+    with args.output.open("w", encoding="utf-8") as f:
         json.dump(metrics, f, indent=2)
 
     print("[TEST] samples=", len(ds_test))
@@ -215,7 +214,7 @@ def main() -> None:
     print("[TEST] WetPredRatio=", f"{wet_pred_ratio:.4f}", "WetTrueRatio=", f"{wet_true_ratio:.4f}")
     if delta_mae_m is not None:
         print("[TEST] DeltaMAE(m)=", f"{delta_mae_m:.4f}")
-    print("[TEST] saved metrics:", metrics_path)
+    print("[TEST] saved metrics:", args.output)
 
 
 if __name__ == "__main__":

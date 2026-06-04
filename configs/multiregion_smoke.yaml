@@ -1,0 +1,101 @@
+seed: 42
+
+data:
+  # Shared defaults for all regions; region-specific values are overridden via the regions list.
+  root: data/pakistan
+  cache_dir: data/pakistan/cache
+  label_dir: flood_maps
+  label_naming: index
+  label_step_sec: 300
+  target_shape: [810, 441]
+
+  # Input channel composition:
+  # static channels: [dem, land_use]
+  # dynamic channels: rainfall history + water-depth history
+  rain_history: 4
+  rain_stride_steps: 6
+  wd_history: 2
+  pred_horizon: 1
+
+  # Temporal split policy:
+  test_ratio: 0.2
+  val_ratio_from_train: 0.15
+
+  # Smoke-sized sampling and patch for quick validation.
+  patch_size: 128
+  train_samples_per_epoch: 3
+  val_samples: 2
+
+  # Feature scaling (min-max after clipping)
+  dem_clip: [0.0, 2000.0]
+  rain_clip: [0.0, 100.0]
+  wd_clip: [0.0, 30.0]
+
+regions:
+  - name: pakistan
+    root: data/pakistan
+    cache_dir: data/pakistan/cache
+    label_dir: flood_maps
+    label_naming: index
+    label_step_sec: 300
+    dem_clip: [0.0, 2000.0]
+    rain_clip: [0.0, 100.0]
+    wd_clip: [0.0, 30.0]
+
+  - name: australia
+    root: data/australia
+    cache_dir: data/australia/cache
+    label_dir: flood_maps
+    label_naming: seconds
+    label_step_sec: 300
+    dem_clip: [0.0, 2000.0]
+    rain_clip: [0.0, 100.0]
+    wd_clip: [0.0, 30.0]
+
+  - name: mozambique
+    root: data/mozambique
+    cache_dir: data/mozambique/cache
+    label_dir: flood_maps
+    label_naming: seconds
+    label_step_sec: 300
+    dem_clip: [0.0, 2000.0]
+    rain_clip: [0.0, 100.0]
+    wd_clip: [0.0, 30.0]
+
+  - name: uk
+    root: data/uk
+    cache_dir: data/uk/cache
+    label_dir: flood_maps
+    label_naming: seconds
+    label_step_sec: 300
+    dem_clip: [0.0, 2000.0]
+    rain_clip: [0.0, 100.0]
+    wd_clip: [0.0, 30.0]
+
+model:
+  base_channels: 32
+
+train:
+  batch_size: 2
+  num_workers: 0
+  lr: 0.0003
+  weight_decay: 0.0001
+  epochs: 1
+  amp: false
+  grad_clip: 1.0
+  lambda_huber: 1.0
+  lambda_mass: 0.05
+  lambda_slope: 0.02
+  lambda_temporal: 0.02
+  lambda_wetdry: 0.05
+  lambda_sv: 0.02
+  lambda_manning: 0.01
+  dt: 300.0
+  wet_threshold_m: 0.1
+  wet_bce_temperature: 0.05
+  slope_epsilon: 0.002
+  device: cpu
+
+output:
+  dir: outputs/multiregion_smoke
+  save_every: 1

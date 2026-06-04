@@ -25,6 +25,13 @@ def load_config(path: Path) -> dict:
         return yaml.safe_load(f)
 
 
+def load_checkpoint(path: Path, map_location: torch.device) -> dict:
+    try:
+        return torch.load(path, map_location=map_location, weights_only=False)
+    except TypeError:
+        return torch.load(path, map_location=map_location)
+
+
 def clip_scale(x: np.ndarray, min_v: float, max_v: float) -> np.ndarray:
     x = np.clip(x, min_v, max_v)
     denom = max(max_v - min_v, 1e-6)
@@ -107,7 +114,7 @@ def main() -> None:
         base_channels=int(cfg["model"]["base_channels"]),
     ).to(device)
 
-    ckpt = torch.load(args.checkpoint, map_location=device)
+    ckpt = load_checkpoint(args.checkpoint, map_location=device)
     model.load_state_dict(ckpt["model"])
     model.eval()
 
@@ -142,7 +149,7 @@ def main() -> None:
         x_t = torch.from_numpy(x).to(device)
 
         with torch.no_grad():
-            with torch.cuda.amp.autocast(enabled=amp):
+            with torch.amp.autocast(device_type=device.type, enabled=amp):
                 pred = model(x_t).detach().cpu().numpy()[0, 0]
 
         pred = np.clip(pred, 0.0, 1.0)

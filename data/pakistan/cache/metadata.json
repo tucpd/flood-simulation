@@ -7,6 +7,7 @@
   "rain_count": 672,
   "label_step_sec": 300,
   "rain_step_sec": 1800,
+  "label_naming": "index",
   "label_start_sec": 0,
   "label_end_sec": 1209600,
   "rain_start": "20220818-S000000",

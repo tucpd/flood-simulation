@@ -178,3 +178,5 @@ pyrightconfig.json
 data/
 outputs/
 context.md
+temp/
+data/*/cache
